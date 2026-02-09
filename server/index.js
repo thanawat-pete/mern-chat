@@ -49,6 +49,9 @@ if (!DB_URL) {
         })
 }
 
+const userRouter = require("./routers/user.router");
+app.use("/api/user", userRouter);
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
