@@ -7,12 +7,12 @@ const secret = process.env.JWT_SECRET;
 
 const signUp = async (req, res) => {
     const {
-        username,
+        fullname,
         email,
         password
     } = req.body;
     try {
-        if (!username || !email || !password) {
+        if (!fullname || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required",
             });
@@ -27,7 +27,7 @@ const signUp = async (req, res) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
-            username,
+            fullname,
             email,
             password: hashedPassword
         });
