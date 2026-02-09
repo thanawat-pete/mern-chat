@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const {
-    userController
+    UserController
 } = require("../controllers/user.controller");
 
 //localhost:5000/api/user/signup
-router.post("/signup", userController.signUp);
+router.post("/signup", UserController.signUp);
 //localhost:5000/api/user/signin
-router.post("/signin", userController.signIn);
+router.post("/signin", UserController.signIn);
 //localhost:5000/api/user/logout
-router.post("/logout", userController.logout);
+router.post("/logout", UserController.logout);
 
 module.exports = router;
