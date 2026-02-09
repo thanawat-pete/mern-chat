@@ -1,0 +1,16 @@
+{
+  "name": "mern-chat-server",
+  "version": "1.0.0",
+  "description": "mern chat backend service",
+  "repository": {
+    "type": "git",
+    "url": "/thanawat-pete/mern-chat"
+  },
+  "license": "ISC",
+  "author": "thanawat-pete",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
