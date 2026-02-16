@@ -176,10 +176,23 @@ const logout = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    const {
+        fullname,
+        profilePicture
+    } = req.body;
+    
+}
+
+const checkAuth = async (req, res) => {
+}
+
 const UserController = {
     signUp,
     signIn,
-    logout
+    logout,
+    updateProfile,
+    checkAuth
 };
 
 module.exports = UserController;
