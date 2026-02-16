@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {
-    UserController
-} = require("../controllers/user.controller");
+const UserController = require("../controllers/user.controller");
 
 //localhost:5000/api/user/signup
 router.post("/signup", UserController.signUp);
