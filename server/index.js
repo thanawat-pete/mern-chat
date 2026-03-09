@@ -1,57 +1,54 @@
-const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const express = require("express");
 
-const app = express();
+// 1. Import app and server from your fixed socket file
+const { server, app } = require("./lib/socket");
 
+// 2. Import your router (ensure this file exists!)
+const userRouter = require("./routers/user.router.js"); 
+const messageRouter = require("./routers/message.router.js");
 dotenv.config();
-const PORT = process.env.PORT;
-const DB_URL = process.env.DB_URL;
-const CLIENT_URL = process.env.CLIENT_URL;
 
-app.get("/", (req, res) => {
-    res.send(`
-        <div style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: sarabun;
-        ">
-            <h1>Welcome to MERN Chat Server.</h1>
-        </div>
-    `);
-});
+const PORT = process.env.PORT || 5000;
+const DB_URL = process.env.DB_URL; 
+const CLIENT_URL = process.env.CLIENT_URL;
 
 app.use(express.json());
 app.use(
-    cors({
-        credentials: true,
-        origin: CLIENT_URL,
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
-    })
+  cors({
+    credentials: true,
+    origin: CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
+  })
 );
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.send("Welcome to MERN CHAT SERVER");
+});
+
+// 3. Changed DATABASE_URL to DB_URL to match your const definition
 if (!DB_URL) {
-    console.log("DB_URL(Database URL) is undefined in .env file.")
+  console.log("Database url is missing in .env");
 } else {
-    mongoose.connect(DB_URL)
-        .then(() => {
-            console.log("Database connected successful!");
-        })
-        .catch((error) => {
-            console.log("Database connected failed!");
-            console.log(error);
-        })
+  mongoose
+    .connect(DB_URL)
+    .then(() => {
+      console.log("Database connected successfully!");
+    })
+    .catch((error) => {
+      console.log("Database connection failed:", error.message);
+    });
 }
 
-const userRouter = require("./routers/user.router");
-app.use("/api/user", userRouter);
+// 4. Router is now properly imported at the top
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/message", messageRouter);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log("Server is running on http://localhost:" + PORT);
 });
