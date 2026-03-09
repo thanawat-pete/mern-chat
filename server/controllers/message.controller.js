@@ -1,13 +1,16 @@
 const message = require("../models/message.model.js");
 const User = require("../models/user.model");
 const cloudinary = require("../configs/cloudinary");
+const { getRecipientSocketId, io } = require("../lib/socket.js");
 
 const getUsersForSidebar = async (req, res) => {
   try {
     const loggedUserId = req.user._id;
     const filteredUsers = await User.find({
       _id: { $ne: loggedUserId },
-    }).select("-password");
+    })
+      .select("-password")
+      .sort({ createdAt: -1 });
     return res.status(200).json(filteredUsers);
   } catch (error) {
     return res.status(500).json({
@@ -32,7 +35,7 @@ const sendMessage = async (req, res) => {
         message: "Message cannot be empty",
       });
     }
-    const fileUrl = "";
+    let fileUrl = "";
     if (file) {
       const uploadResponse = await cloudinary.uploader.upload(file);
       fileUrl = uploadResponse.secure_url;
@@ -44,6 +47,14 @@ const sendMessage = async (req, res) => {
       file: fileUrl,
     });
     await newMessage.save();
+
+    // ================= Socket.IO Real-time feature =================
+    const recipientSocketId = getRecipientSocketId(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("newMessage", newMessage);
+    }
+    // ===============================================================
+
     res.status(200).json(newMessage);
   } catch (error) {
     return res.status(500).json({
@@ -56,7 +67,7 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const myId = req.user._id;
-    const {id: userToChat} = req.params;
+    const { id: userToChat } = req.params;
     const messages = await message.find({
       $or: [
         { sender: myId, recipient: userToChat },
@@ -64,8 +75,8 @@ const getMessages = async (req, res) => {
       ],
     });
     return res.status(200).json({
-      messages
-    })
+      messages,
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error while getting messages",

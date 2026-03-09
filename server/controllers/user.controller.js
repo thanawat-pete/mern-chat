@@ -111,8 +111,8 @@ const signIn = async (req, res) => {
     const token = jwt.sign(
       {
         userId: userDoc._id,
-      fullname: userDoc.fullname,
-      email: userDoc.email,
+        fullname: userDoc.fullname,
+        email: userDoc.email,
       },
       secret,
       {
@@ -189,9 +189,14 @@ const updateProfile = async (req, res) => {
         { new: true },
       );
       if (!updatedUser) {
-        return res.status(500).json({ message: "Error while updating user profile" });
+        return res
+          .status(500)
+          .json({ message: "Error while updating user profile" });
       }
-      return res.json({ message: "User profile updated successfully" });
+      return res.json({
+        message: "User profile updated successfully",
+        user: updatedUser,
+      });
     } else if (fullname) {
       const updatedUser = await User.findByIdAndUpdate(
         userId,
@@ -201,9 +206,14 @@ const updateProfile = async (req, res) => {
         { new: true },
       );
       if (!updatedUser) {
-        return res.status(500).json({ message: "Error while updating user profile" });
+        return res
+          .status(500)
+          .json({ message: "Error while updating user profile" });
       }
-      return res.json({ message: "User profile updated successfully" });
+      return res.json({
+        message: "User profile updated successfully",
+        user: updatedUser,
+      });
     } else if (profilePicture) {
       // Upload picture to cloudinary
       const uploadResponse = await cloudinary.uploader.upload(profilePicture);
@@ -220,16 +230,21 @@ const updateProfile = async (req, res) => {
         { new: true },
       );
       if (!updatedUser) {
-        return res.status(500).json({ message: "Error while updating user profile" });
+        return res
+          .status(500)
+          .json({ message: "Error while updating user profile" });
       }
-      return res.json({ message: "User profile updated successfully" });
+      return res.json({
+        message: "User profile updated successfully",
+        user: updatedUser,
+      });
     } else {
       return res.status(400).json({ message: "All fields are required" });
     }
   } catch (error) {
-    return res.status(500).json({ 
-        message: "Internal Server Error While updating profile",
-        error: error.message
+    return res.status(500).json({
+      message: "Internal Server Error While updating profile",
+      error: error.message,
     });
   }
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
-import { Camera } from "lucide-react";
+import { Camera, User, Mail, Calendar, ShieldCheck } from "lucide-react";
 
 const ProfilePage = () => {
   const { authUser, updateProfile, isUpdatingProfile } = useAuthStore();
@@ -13,10 +13,9 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (authUser) {
-      // Fix: Use correct property name (fullname instead of fullName) based on Navbar
       setFullName(authUser.fullname || authUser.user?.fullname || "");
       setEmail(authUser.email || authUser.user?.email || "");
-      setFilePreview(authUser.profilePic || authUser.user?.profilePic || null);
+      setFilePreview(authUser.profilePicture || authUser.user?.profilePicture || null);
     }
   }, [authUser]);
 
@@ -32,14 +31,13 @@ const ProfilePage = () => {
 
     const reader = new FileReader();
     reader.onload = () => {
-      // reader.result contains the base64 encoded image
       setFilePreview(reader.result);
-      setFileData(reader.result); // base64 string ready to send
+      setFileData(reader.result);
     };
     reader.onerror = () => {
       toast.error("Failed to read file");
     };
-    reader.readAsDataURL(file); // Converts to base64
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async (e) => {
@@ -48,44 +46,51 @@ const ProfilePage = () => {
       return toast.error("Nothing to update");
     }
     const payload = {};
-    if (fullName) payload.fullname = fullName; // Send as fullname to match backend expectation
-    if (fileData) payload.profilePic = fileData;
+    if (fullName) payload.fullname = fullName;
+    if (fileData) payload.profilePicture = fileData;
 
     await updateProfile(payload);
+    setFileData(null); // Reset after save
   };
 
   const triggerFile = () => fileInputRef.current?.click();
 
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center p-6 pt-24 transition-colors duration-300">
-      <div className="w-full max-w-md bg-base-200 p-8 rounded-2xl border border-base-300 shadow-xl">
+    <div className="min-h-screen pt-20 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-base-100 rounded-3xl p-8 shadow-2xl border border-base-200">
+        
+        {/* Header Section */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-base-content mb-2">Profile</h1>
-          <p className="text-base-content/60 text-sm">
-            Your profile information
+          <h1 className="text-3xl font-bold bg-linear-to-r from-primary to-secondary text-transparent bg-clip-text mb-2">
+            Your Profile
+          </h1>
+          <p className="text-base-content/60">
+            Manage your account settings and preferences
           </p>
         </div>
 
-        <div className="flex flex-col items-center">
-          <div className="relative mb-6">
-            <div className="w-32 h-32 rounded-full bg-base-300 flex items-center justify-center overflow-hidden border-4 border-base-100 shadow-sm">
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full bg-base-200 flex items-center justify-center overflow-hidden border-4 border-primary/20 shadow-lg shadow-primary/10 transition-all duration-300 group-hover:border-primary/50">
               {filePreview ? (
                 <img
                   src={filePreview}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
+                  alt="Avatar"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <div className="text-5xl">👤</div>
+                <User className="w-16 h-16 text-base-content/20" />
               )}
             </div>
+            
             <button
               type="button"
               onClick={triggerFile}
-              className="absolute bottom-0 right-0 bg-primary text-primary-content rounded-full p-2.5 hover:bg-primary/80 transition-colors shadow-md border-2 border-base-100"
-              title="Change photo"
+              className="absolute bottom-0 right-0 bg-primary text-primary-content rounded-full p-2.5 shadow-lg hover:bg-primary/90 transition-all duration-300 hover:scale-110 active:scale-95 z-10"
+              title="Change avatar"
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="w-5 h-5" />
             </button>
             <input
               ref={fileInputRef}
@@ -95,63 +100,96 @@ const ProfilePage = () => {
               className="hidden"
             />
           </div>
-
-          <p className="text-sm text-base-content/60 mb-8">
-            Click the camera icon to update your photo
+          <p className="text-sm text-base-content/50 mt-4">
+            Upload a new avatar. Max size 5MB.
           </p>
+        </div>
 
-          <form onSubmit={handleSave} className="w-full space-y-5">
-            <div>
-              <label className="block text-base-content/80 text-sm font-medium mb-2">
-                Full Name
-              </label>
+        {/* Form Section */}
+        <form onSubmit={handleSave} className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-base-content/80 ml-1">
+              Full Name
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User className="w-5 h-5 text-base-content/40" />
+              </div>
               <input
+                type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-3 bg-base-100 border border-base-300 rounded-xl text-base-content placeholder-base-content/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                placeholder="John Doe"
+                className="input input-bordered w-full pl-12 bg-base-200/50 focus:bg-base-100 transition-colors"
+                placeholder="Enter your full name"
               />
             </div>
+          </div>
 
-            <div>
-              <label className="block text-base-content/80 text-sm font-medium mb-2">
-                Email Address
-              </label>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-base-content/80 ml-1">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail className="w-5 h-5 text-base-content/40" />
+              </div>
               <input
+                type="email"
                 value={email}
                 readOnly
-                className="w-full px-4 py-3 bg-base-300/50 border border-base-300 rounded-xl text-base-content/60 cursor-not-allowed focus:outline-none"
-                placeholder="john@example.com"
+                className="input input-bordered w-full pl-12 bg-base-200/50 text-base-content/60 cursor-not-allowed"
+                placeholder="Your email address"
               />
             </div>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full btn btn-primary mt-8"
-              disabled={isUpdatingProfile}
-            >
-              {isUpdatingProfile ? "Saving..." : "Save Changes"}
-            </button>
-          </form>
+          <button
+            type="submit"
+            disabled={isUpdatingProfile}
+            className="btn btn-primary w-full mt-2 shadow-lg shadow-primary/20"
+          >
+            {isUpdatingProfile ? (
+              <span className="loading loading-spinner loading-sm"></span>
+            ) : (
+              "Save Changes"
+            )}
+          </button>
+        </form>
 
-          <div className="w-full mt-10 pt-8 border-t border-base-300">
-            <h3 className="font-semibold text-base-content mb-4">Account Information</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center bg-base-100 p-3 rounded-lg border border-base-300">
-                <span className="text-base-content/80">Member Since</span>
-                <span className="text-base-content font-medium">
-                  {authUser?.createdAt
-                    ? new Date(authUser.createdAt).toLocaleDateString()
-                    : "Unknown"}
-                </span>
+        {/* Account Info Section */}
+        <div className="mt-8 pt-8 border-t border-base-200">
+          <h3 className="text-sm font-semibold text-base-content/80 mb-4 px-1">
+            Account Details
+          </h3>
+          <div className="bg-base-200/50 rounded-2xl p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-base-content/70">
+                <Calendar className="w-4 h-4" />
+                <span className="text-sm">Member Since</span>
               </div>
-              <div className="flex justify-between items-center bg-base-100 p-3 rounded-lg border border-base-300">
-                <span className="text-base-content/80">Account Status</span>
-                <span className="text-success font-medium">Active</span>
+              <span className="text-sm font-medium">
+                {authUser?.createdAt
+                  ? new Date(authUser.createdAt).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "N/A"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-base-content/70">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-sm">Account Status</span>
+              </div>
+              <div className="badge badge-success badge-sm py-2.5 gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                Active
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
