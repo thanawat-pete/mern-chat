@@ -8,7 +8,7 @@ const messageSchema = new Schema({
     text: {
         type: String
     },
-    files: {
+    file: {
         type: String
     },
     sender: {

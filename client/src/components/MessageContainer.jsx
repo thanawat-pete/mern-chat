@@ -69,9 +69,6 @@ const MessageContainer = () => {
     return <ChatboxSkeleton />;
   }
 
-  // Ensure messages is an array (fallback to empty array if undefined/null)
-  const safeMessages = Array.isArray(messages) ? messages : (messages?.messages || []);
-
   return (
     <div className="flex-1 flex flex-col overflow-auto h-full">
       {/* Header */}
@@ -101,12 +98,12 @@ const MessageContainer = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-base-200">
-        {safeMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-base-content/60">
             Send a message to start the conversation!
           </div>
         ) : (
-          safeMessages.map((msg, idx) => {
+          messages.map((msg, idx) => {
             const isMe = msg.sender === authUser?._id || msg.sender === authUser?.user?._id;
             const profilePic = isMe
               ? (authUser?.profilePicture || authUser?.user?.profilePicture || "/avatar.webp")
